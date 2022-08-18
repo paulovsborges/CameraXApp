@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
@@ -16,6 +15,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.video.FallbackStrategy
 import androidx.camera.video.MediaStoreOutputOptions
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
@@ -82,29 +82,33 @@ class MainActivity : AppCompatActivity() {
                 }
 
             val recorder = Recorder.Builder()
-                .setQualitySelector(QualitySelector.from(Quality.HIGHEST))
+                .setQualitySelector(
+                    QualitySelector.from(
+                        Quality.HIGHEST,
+                        FallbackStrategy.higherQualityOrLowerThan(Quality.SD)
+                    )
+                )
                 .build()
 
             videoCapture = VideoCapture.withOutput(recorder)
             imageCapture = ImageCapture.Builder().build()
 
-            val imageAnalyzer = ImageAnalysis
-                .Builder()
-                .build()
-                .also {
-                    cameraExecutor?.let { executor ->
-                        it.setAnalyzer(executor, LuminosityAnalyzer { luma ->
-                            Log.d("CAMERA_USE_CASE", "Average luminosity: $luma")
-                        })
-                    }
-                }
+//            val imageAnalyzer = ImageAnalysis
+//                .Builder()
+//                .build()
+//                .also {
+//                    cameraExecutor?.let { executor ->
+//                        it.setAnalyzer(executor, LuminosityAnalyzer { luma ->
+//                            Log.d("CAMERA_USE_CASE", "Average luminosity: $luma")
+//                        })
+//                    }
+//                }
 
-            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this, cameraSelector, preview, videoCapture)
-//                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, imageAnalyzer, videoCapture)
+                cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageCapture, videoCapture)
             } catch (e: Exception) {
             }
         }, ContextCompat.getMainExecutor(this))
@@ -134,7 +138,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onError(exception: ImageCaptureException) {
-                    Toast.makeText(this@MainActivity, "failed to save image", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "fail: ${exception.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         )
