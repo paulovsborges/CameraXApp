@@ -83,7 +83,7 @@ class CameraInterfaceImpl : CameraInterface {
 //                    }
 //                }
 
-            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
                 cameraProvider.unbindAll()
