@@ -83,11 +83,11 @@ class CameraInterfaceImpl : CameraInterface {
 //                    }
 //                }
 
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
 
             try {
                 cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(mActivity, cameraSelector, preview, imageCapture, videoCapture)
+                cameraProvider.bindToLifecycle(mActivity, cameraSelector, preview, imageCapture)
             } catch (e: Exception) {
             }
         }, ContextCompat.getMainExecutor(mActivity))
